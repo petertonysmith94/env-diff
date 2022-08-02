@@ -1,5 +1,4 @@
 import ComparisonEngine from '../../src/comparison';
-import { parse } from 'dotenv'
 
 const mockEmit = jest.fn();
 jest.mock('../../src/Events/ComparisonEventEmitter', () => {
@@ -12,11 +11,9 @@ jest.mock('../../src/Events/ComparisonEventEmitter', () => {
   }
 })
 
-jest.mock('dotenv', () => {
-  return {
-    parse: jest.fn()
-  }
-})
+const dotenv = jest.requireActual('dotenv')
+const parse = jest.fn();
+dotenv.parse = parse;
 
 let comparisonEngine: ComparisonEngine
 
@@ -42,6 +39,30 @@ describe('compare', () => {
     expect(mockEmit).toBeCalledTimes(0)
   })
 
+  test('given two file paths which return the same should emit sameKeySameValue event', () => {
+    const destinationEnvFilePath = 'destination.env'
+    const destinationObj = {
+      SAME_KEY_SAME_VALUE: 'same',
+      SAME_KEY_DIFFERENT_VALUE: 'dest',
+      KEY_REMOVED: 'removed_key'
+    }
+    const sourceEnvFilePath = 'source.env'
+    const sourceObj = {
+      SAME_KEY_SAME_VALUE: 'same',
+      SAME_KEY_DIFFERENT_VALUE: 'source',
+      KEY_MISSING: 'missing_key'
+    }
+    parse
+      .mockReturnValueOnce(destinationObj)
+      .mockReturnValueOnce(sourceObj)
+
+    comparisonEngine.compare(destinationEnvFilePath, sourceEnvFilePath)
+
+    expect(parse).toBeCalledTimes(2)
+    expect(parse).toBeCalledWith(destinationEnvFilePath)
+    expect(parse).toBeCalledWith(sourceEnvFilePath)
+    expect(mockEmit).toBeCalledTimes(4)
+  })
 })
 
 describe('compareObject', () => {
