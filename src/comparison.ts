@@ -1,9 +1,12 @@
 import ComparisonEventEmitter from './Events/ComparisonEventEmitter'
 import ComparisonEvent from './Events/ComparisonEvent'
+import * as dotenv from 'dotenv'
 import { has } from 'lodash';
 
 class ComparisonEngine {
-
+  /**
+   * @var {ComparisonEventEmitter}
+   */
   private eventEmitter: ComparisonEventEmitter;
 
   constructor () {
@@ -23,7 +26,10 @@ class ComparisonEngine {
    * @emits keyRemoved
    */
   compare(destinationEnvFilePath: string, sourceEnvFilePath: string): void {
-    this.eventEmitter.emit('keyMissing', 'test', true);
+    const destinationObject = dotenv.parse(destinationEnvFilePath) || {};
+    const sourceObject = dotenv.parse(sourceEnvFilePath) || {};
+
+    this.compareObjects(destinationObject, sourceObject);
   }
 
   /**

@@ -1,4 +1,5 @@
 import ComparisonEngine from '../../src/comparison';
+import { parse } from 'dotenv'
 
 const mockEmit = jest.fn();
 jest.mock('../../src/Events/ComparisonEventEmitter', () => {
@@ -11,12 +12,46 @@ jest.mock('../../src/Events/ComparisonEventEmitter', () => {
   }
 })
 
-let comparisonEngine: ComparisonEngine;
+jest.mock('dotenv', () => {
+  return {
+    parse: jest.fn()
+  }
+})
 
-describe('Compare', () => {
-  beforeEach(() => {
-    comparisonEngine = new ComparisonEngine();
-    mockEmit.mockClear();
+let comparisonEngine: ComparisonEngine
+
+beforeEach(() => {
+  comparisonEngine = new ComparisonEngine()
+  mockEmit.mockClear()
+})
+
+afterEach(() => {
+  jest.clearAllMocks()
+})
+
+describe('compare', () => {
+  test('given two file paths - method should attempt to parse these', () => {
+    const destinationEnvFilePath = 'destination.env'
+    const sourceEnvFilePath = 'source.env'
+
+    comparisonEngine.compare(destinationEnvFilePath, sourceEnvFilePath)
+
+    expect(parse).toBeCalledTimes(2)
+    expect(parse).toBeCalledWith(destinationEnvFilePath)
+    expect(parse).toBeCalledWith(sourceEnvFilePath)
+    expect(mockEmit).toBeCalledTimes(0)
+  })
+
+})
+
+describe('compareObject', () => {
+  test('no keys in object should not emit any events', () => {
+    const destObj = {}
+    const sourceObj = {}
+
+    comparisonEngine.compareObjects(destObj, sourceObj)
+
+    expect(mockEmit).toBeCalledTimes(0)
   })
 
   test('equal keys, equals values should emit the sameKeySameValue event', () => {
