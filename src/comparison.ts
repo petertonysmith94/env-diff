@@ -27,7 +27,7 @@ class ComparisonEngine {
   }
 
   /**
-   * 
+   * Compares two objects and emits events based on their presences and equality
    * 
    * @param {object} destinationObject 
    * @param {object} sourceObject
