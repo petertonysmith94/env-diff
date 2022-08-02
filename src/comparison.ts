@@ -1,5 +1,6 @@
 import ComparisonEventEmitter from './Events/ComparisonEventEmitter'
-
+import ComparisonEvent from './Events/ComparisonEvent'
+import { has } from 'lodash';
 
 class ComparisonEngine {
 
@@ -14,6 +15,12 @@ class ComparisonEngine {
    * 
    * @param {string} destinationEnvFilePath
    * @param {string} sourceEnvFilePath
+   * 
+   * @see ComparisonEvent
+   * @emits sameKeySameValue
+   * @emits sameKeyDifferentValue
+   * @emits keyMissing
+   * @emits keyRemoved
    */
   compare(destinationEnvFilePath: string, sourceEnvFilePath: string): void {
     this.eventEmitter.emit('keyMissing', 'test', true);
@@ -21,11 +28,42 @@ class ComparisonEngine {
 
   /**
    * 
-   * @param destinationObject 
-   * @param sourceObject 
+   * 
+   * @param {object} destinationObject 
+   * @param {object} sourceObject
+   * 
+   * @see ComparisonEvent
+   * @emits sameKeySameValue
+   * @emits sameKeyDifferentValue
+   * @emits keyMissing
+   * @emits keyRemoved
    */
-  compareObjects(destinationObject: object, sourceObject: string): void {
+  public compareObjects(destinationObject: object, sourceObject: object): void {
+    let missingKeys = Object.assign({}, sourceObject);
 
+    Object.keys(destinationObject).forEach((destKey) => {
+      delete missingKeys[destKey];
+
+      // The key has been remove from the source env
+      if (!has(sourceObject, destKey)) {
+        this.eventEmitter.emit('keyRemoved', destKey, destinationObject[destKey]);
+        return;
+      }
+      
+      const destinationValue = destinationObject[destKey];
+      const sourceValue = sourceObject[destKey];
+
+      if (destinationValue !== sourceValue) {
+        this.eventEmitter.emit('sameKeyDifferentValue', destKey, destinationValue, sourceValue);
+        return;
+      }
+
+      this.eventEmitter.emit('sameKeySameValue', destKey, destinationValue);
+    });
+
+    Object.keys(missingKeys).forEach((srcKey) => {
+      this.eventEmitter.emit('keyMissing', srcKey, missingKeys[srcKey]);
+    })
   }
 }
 
