@@ -1,5 +1,5 @@
-import ComparisonEventEmitter from './Events/ComparisonEventEmitter'
-import ComparisonEvent from './Events/ComparisonEvent'
+import ComparisonEventEmitter from '../Events/ComparisonEventEmitter'
+import ComparisonEvent from '../Events/ComparisonEvent'
 import * as dotenv from 'dotenv'
 import { has } from 'lodash';
 
@@ -9,8 +9,8 @@ class ComparisonEngine {
    */
   private eventEmitter: ComparisonEventEmitter;
 
-  constructor () {
-    this.eventEmitter = new ComparisonEventEmitter();
+  constructor (eventEmitter: ComparisonEventEmitter | null = null) {
+    this.eventEmitter = eventEmitter ?? new ComparisonEventEmitter();
   }
 
   /**

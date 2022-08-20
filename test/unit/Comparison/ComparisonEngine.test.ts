@@ -1,7 +1,7 @@
-import ComparisonEngine from '../../src/comparison';
+import ComparisonEngine from '../../../src/Comparison/ComparisonEngine';
 
 const mockEmit = jest.fn();
-jest.mock('../../src/Events/ComparisonEventEmitter', () => {
+jest.mock('../../../src/Events/ComparisonEventEmitter', () => {
   return {
     default: jest.fn().mockImplementation(() => {
       return {
